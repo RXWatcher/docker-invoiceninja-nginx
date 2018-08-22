@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPENDENCIES \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
+    
+EXPOSE 80
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
