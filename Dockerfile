@@ -28,8 +28,9 @@ RUN apt-get update && apt-get install -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
     ) \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPENDENCIES \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    && cp ./nginx/nginx.conf /etc/nginx/
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* 
+
+COPY ./nginx.conf /etc/nginx/
 
 EXPOSE 80
 
