@@ -35,4 +35,9 @@ COPY ./nginx.conf /etc/nginx/
 
 EXPOSE 80
 
+groupmod -o -g "$PGID" www-data
+usermod -o -u "$PUID" www-data
+chown -R www-data:www-data /var/www/app
+
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
+
