@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
     && ( \
         groupmod -o -g "$PGID" www-data \
         && usermod -o -u "$PUID" www-data \
-        && chown -R www-data:www-data /var/www/app &&
+        && chown -R www-data:www-data /var/www/app && \
         crontab /var/crontab.txt \
         && chmod 600 /etc/crontab \
     ) \
