@@ -1,6 +1,6 @@
 FROM invoiceninja/invoiceninja
 
-LABEL maintainer="Jason Raimondi <jason@raimondi.us>"
+LABEL maintainer="RXWatcher"
 
 ENV NGINX_VERSION 1.13.12-1~stretch
 ENV BUILD_DEPENDENCIES="\
@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
 		&& rm -f /etc/nginx/conf.d/* \
     ) \
     && ( \
+        groupmod -o -g "$PGID" www-data \
+        && usermod -o -u "$PUID" www-data \
+        && chown -R www-data:www-data /var/www/app &&
         crontab /var/crontab.txt \
         && chmod 600 /etc/crontab \
     ) \
@@ -34,10 +37,6 @@ RUN apt-get update && apt-get install -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
 COPY ./nginx.conf /etc/nginx/
 
 EXPOSE 80
-
-groupmod -o -g "$PGID" www-data
-usermod -o -u "$PUID" www-data
-chown -R www-data:www-data /var/www/app
 
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
 
