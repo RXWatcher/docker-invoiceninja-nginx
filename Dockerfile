@@ -11,6 +11,8 @@ ENV BUILD_DEPENDENCIES="\
 		supervisor \
 		cron \
 		gnupg"
+		
+COPY ./crontab.txt /var/crontab.txt
 
 RUN apt-get update && apt-get install --no-install-recommends --no-install-suggests -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
 	\
@@ -32,8 +34,6 @@ RUN apt-get update && apt-get install --no-install-recommends --no-install-sugge
     && apt-get clean \
     && mkdir -p /var/log/nginx \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-COPY ./crontab.txt /var/crontab.txt
 
 RUN crontab /var/crontab.txt \
     && chmod 600 /etc/crontab \
