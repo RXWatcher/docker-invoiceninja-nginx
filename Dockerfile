@@ -13,6 +13,8 @@ ENV BUILD_DEPENDENCIES="\
 		gnupg"
 		
 COPY ./crontab.txt /var/crontab.txt
+COPY ./nginx/conf.d/ /etc/nginx/conf.d
+COPY ./supervisord.conf /etc/supervisord.conf
 
 RUN apt-get update && apt-get install --no-install-recommends --no-install-suggests -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
 	\
@@ -42,7 +44,5 @@ RUN crontab /var/crontab.txt \
     && touch /var/log/ninja_cron/reminders.log \
     && touch /var/log/ninja_cron/invoices.log
 
-COPY ./supervisord.conf /etc/supervisord.conf
-COPY ./nginx/conf.d/ /etc/nginx/conf.d
 EXPOSE 80
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
