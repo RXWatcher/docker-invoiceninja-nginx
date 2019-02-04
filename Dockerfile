@@ -13,7 +13,7 @@ ENV BUILD_DEPENDENCIES="\
 		gnupg"
 		
 COPY ./crontab.txt /var/crontab.txt
-COPY ./nginx/conf.d/ /etc/nginx/conf.d
+COPY ./nginx.conf /etc/nginx/
 COPY ./supervisord.conf /etc/supervisord.conf
 
 RUN apt-get update && apt-get install --no-install-recommends --no-install-suggests -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
