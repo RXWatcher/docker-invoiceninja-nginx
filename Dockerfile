@@ -43,5 +43,5 @@ COPY ./nginx.conf /etc/nginx/
 COPY ./bin/ /ninja/bin/
 
 RUN chmod +x /ninja/bin/*
-
+EXPOSE 80
 CMD ["/ninja/bin/start"]
