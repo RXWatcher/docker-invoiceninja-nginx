@@ -2,7 +2,7 @@ FROM invoiceninja/invoiceninja
 
 LABEL maintainer="RXWatcher"
 
-ENV NGINX_VERSION 1.13.12-1~stretch
+ENV NGINX_VERSION 1.15.8-1~stretch
 ENV BUILD_DEPENDENCIES="\
         \
         wget" \
@@ -14,8 +14,6 @@ ENV BUILD_DEPENDENCIES="\
 		
 COPY ./crontab.txt /var/crontab.txt
 
-COPY ./supervisord.conf /etc/supervisord.conf
-
 RUN apt-get update && apt-get install --no-install-recommends --no-install-suggests -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
 	\
 	&& ( \
@@ -24,18 +22,12 @@ RUN apt-get update && apt-get install --no-install-recommends --no-install-sugge
 	    && apt-get update && apt-get install --no-install-recommends --no-install-suggests -y nginx=${NGINX_VERSION} \
 	    && rm -f /etc/nginx/conf.d/* \
     ) \
-    && ( \
-        PUID=${PUID:-1000} \ 
-        && PGID=${PGID:-1000} \ 
-        && groupmod -o -g "$PGID" www-data \ 
-        && usermod -o -u "$PUID" www-data \
-        && crontab /var/crontab.txt \
-        && chmod 600 /etc/crontab \
-    ) \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPENDENCIES \
     && apt-get clean \
     && mkdir -p /var/log/nginx \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY ./crontab.txt /var/crontab.txt
 
 RUN crontab /var/crontab.txt \
     && chmod 600 /etc/crontab \
@@ -45,6 +37,11 @@ RUN crontab /var/crontab.txt \
     && touch /var/log/ninja_cron/invoices.log
 
 COPY ./nginx.conf /etc/nginx/
+COPY ./supervisord.conf /etc/supervisord.conf
+COPY ./nginx/conf.d/ /etc/nginx/conf.d
+COPY ./nginx.conf /etc/nginx/
+COPY ./bin/ /ninja/bin/
 
-EXPOSE 80
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
+RUN chmod +x /ninja/bin/*
+
+CMD ["/ninja/bin/start"]
