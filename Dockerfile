@@ -22,6 +22,14 @@ RUN apt-get update && apt-get install --no-install-recommends --no-install-sugge
 	    && apt-get update && apt-get install --no-install-recommends --no-install-suggests -y nginx=${NGINX_VERSION} \
 	    && rm -f /etc/nginx/conf.d/* \
     ) \
+    && ( \
+        PUID=${PUID:-1000} \ 
+        && PGID=${PGID:-1000} \ 
+        && groupmod -o -g "$PGID" www-data \ 
+        && usermod -o -u "$PUID" www-data \
+        && crontab /var/crontab.txt \
+        && chmod 600 /etc/crontab \
+    ) \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPENDENCIES \
     && apt-get clean \
     && mkdir -p /var/log/nginx \
