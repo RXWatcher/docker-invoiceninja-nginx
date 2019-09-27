@@ -1,6 +1,6 @@
-FROM invoiceninja/invoiceninja:4.5.12
+FROM invoiceninja/invoiceninja
 
-LABEL maintainer="Jason Raimondi <jason@raimondi.us>"
+LABEL maintainer="RXWatcher"
 
 ENV NGINX_VERSION 1.15.8-1~stretch
 ENV BUILD_DEPENDENCIES="\
@@ -11,6 +11,8 @@ ENV BUILD_DEPENDENCIES="\
 		supervisor \
 		cron \
 		gnupg"
+		
+COPY ./crontab.txt /var/crontab.txt
 
 RUN apt-get update && apt-get install --no-install-recommends --no-install-suggests -y $BUILD_DEPENDENCIES $RUN_DEPENDENCIES \
 	\
@@ -19,6 +21,14 @@ RUN apt-get update && apt-get install --no-install-recommends --no-install-sugge
 	    && echo "deb http://nginx.org/packages/mainline/debian/ stretch nginx" >> /etc/apt/sources.list \
 	    && apt-get update && apt-get install --no-install-recommends --no-install-suggests -y nginx=${NGINX_VERSION} \
 	    && rm -f /etc/nginx/conf.d/* \
+    ) \
+    && ( \
+        PUID=${PUID:-1000} \ 
+        && PGID=${PGID:-1000} \ 
+        && groupmod -o -g "$PGID" www-data \ 
+        && usermod -o -u "$PUID" www-data \
+        && crontab /var/crontab.txt \
+        && chmod 600 /etc/crontab \
     ) \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $BUILD_DEPENDENCIES \
     && apt-get clean \
@@ -34,7 +44,12 @@ RUN crontab /var/crontab.txt \
     && touch /var/log/ninja_cron/reminders.log \
     && touch /var/log/ninja_cron/invoices.log
 
+COPY ./nginx.conf /etc/nginx/
 COPY ./supervisord.conf /etc/supervisord.conf
 COPY ./nginx/conf.d/ /etc/nginx/conf.d
+COPY ./nginx.conf /etc/nginx/
+COPY ./bin/ /ninja/bin/
 
-CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
+RUN chmod +x /ninja/bin/*
+EXPOSE 80
+CMD ["/ninja/bin/start"]
