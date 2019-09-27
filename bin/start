@@ -2,5 +2,5 @@
 
 rm -rf /.env.sh
 grep DB /var/www/app/.env | perl -ne 'print "export $_"' >>  /.env.sh
-grep MAIL_ /var/www/app/.env | perl -ne 'print "export $_"' >>  /.env.sh
+grep "^MAIL_" /var/www/app/.env | perl -ne 'print "export $_"' >>  /.env.sh
 /usr/bin/supervisord -n -c /etc/supervisord.conf
